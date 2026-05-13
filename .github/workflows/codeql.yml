@@ -49,7 +49,7 @@ jobs:
           # IMPORTANT PART
           queries: |
             - security-and-quality
-            - ./github/codeql/custom-queries
+            - ./.github/codeql/custom-queries
 
       # ---------------------------
       # JavaScript Build
