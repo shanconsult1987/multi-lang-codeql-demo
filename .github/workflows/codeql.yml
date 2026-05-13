@@ -1,0 +1,109 @@
+name: Multi-Language CodeQL
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  schedule:
+    - cron: '0 4 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        language:
+          - javascript
+          - python
+          - java-kotlin
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # ---------------------------
+      # Initialize CodeQL
+      # ---------------------------
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+
+        with:
+          languages: ${{ matrix.language }}
+
+          # IMPORTANT PART
+          queries: security-and-quality
+
+      # ---------------------------
+      # JavaScript Build
+      # ---------------------------
+
+      - name: Setup Node.js
+        if: matrix.language == 'javascript'
+        uses: actions/setup-node@v4
+
+        with:
+          node-version: 20
+
+      - name: Install JS Dependencies
+        if: matrix.language == 'javascript'
+        run: |
+          cd javascript-app
+          npm install
+
+      # ---------------------------
+      # Python Build
+      # ---------------------------
+
+      - name: Setup Python
+        if: matrix.language == 'python'
+        uses: actions/setup-python@v5
+
+        with:
+          python-version: '3.11'
+
+      - name: Install Python Dependencies
+        if: matrix.language == 'python'
+        run: |
+          cd python-app
+          pip install -r requirements.txt
+
+      # ---------------------------
+      # Java Build
+      # ---------------------------
+
+      - name: Setup Java
+        if: matrix.language == 'java-kotlin'
+        uses: actions/setup-java@v4
+
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build Java App
+        if: matrix.language == 'java-kotlin'
+        run: |
+          cd java-app
+          mvn clean compile
+
+      # ---------------------------
+      # Analyze
+      # ---------------------------
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
