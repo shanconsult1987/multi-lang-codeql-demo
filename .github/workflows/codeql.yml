@@ -47,7 +47,9 @@ jobs:
           languages: ${{ matrix.language }}
 
           # IMPORTANT PART
-          queries: security-and-quality
+          queries: |
+            - security-and-quality
+            - ./github/codeql/custom-queries
 
       # ---------------------------
       # JavaScript Build
